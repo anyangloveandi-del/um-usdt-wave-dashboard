@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>USDT 永续 波段提醒看板</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont; margin: 16px; }
+    h1 { margin-bottom: 8px; }
+    .meta { color: #666; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; font-size: 14px; }
+    th { background: #fafafa; position: sticky; top: 0; }
+    .tag { padding: 2px 6px; border: 1px solid #ddd; border-radius: 999px; }
+    .up { color: green; font-weight: bold; }
+    .down { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>USDT 永续 · 10% 波段 + 放量 + 突破段</h1>
+  <div class="meta" id="meta">加载中…</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>时间</th>
+        <th>币种</th>
+        <th>振幅%</th>
+        <th>放量</th>
+        <th>突破</th>
+        <th>方向</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+<script>
+  const tbody = document.getElementById("tbody");
+  const meta = document.getElementById("meta");
+
+  function row(a){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${a.time}</td>
+      <td><span class="tag">${a.sym}</span></td>
+      <td>${a.a.toFixed(2)}%</td>
+      <td>${a.volOk ? "✅" : "❌"}</td>
+      <td>${a.breakoutOk ? "✅" : "❌"}</td>
+      <td class="${a.a >= 0 ? "up" : "down"}">${a.a >= 0 ? "UP" : "DOWN"}</td>
+    `;
+    return tr;
+  }
+
+  async function load(){
+    const r = await fetch("/api/alerts");
+    const data = await r.json();
+    tbody.innerHTML = "";
+    data.forEach(a => tbody.appendChild(row(a)));
+  }
+
+  async function health(){
+    meta.textContent = "运行中 · " + new Date().toLocaleString();
+  }
+
+  load();
+  health();
+  setInterval(load, 60000);
+  setInterval(health, 5000);
+</script>
+</body>
+</html>
